@@ -1,0 +1,349 @@
+import random
+import csv
+
+def genMem():
+    return random.randint(1, 16000)
+
+def genBurst():
+    lowEnd = 10 * (10**6)
+    highEnd = 10 * (10**12)
+    return random.randint(lowEnd, highEnd)
+    
+def SortBySec(element):
+    return element[1]
+
+def cpuscheduler(processes, processors):
+    queue = [] 
+    for process in processes:
+        queue.append(
+            processes[process[0]]
+        ) 
+    WT = 0
+    TR = 0
+    i=0
+    arrWT = []
+    arrTR = []
+    
+    while(i<len(queue)):
+        TR += queue[i][1]
+        arrWT.append(WT)
+        arrTR.append(TR)
+        WT += queue[i][1]
+        i+=1
+    avgWT = (sum(arrWT)/len(queue)) 
+    avgTR = (sum(arrTR)/len(queue)) 
+    avgWT2 = (avgWT/(2 * 10 ** 9)) 
+    avgTR2 = (avgTR/(2 * 10 ** 9))
+    avgWT4 = (avgWT/(4 * 10 ** 9)) 
+    avgTR4 = ((avgWT/(4 * 10 ** 9)))
+    print(queue)
+    print("average wait time on processor 2ghz:",avgWT2,"ms")
+    print("average turnaround time 2ghz:", avgTR2,"ms")
+    print("average wait time on 4ghz:",avgWT4,"ms")
+    print("average turnaround time 4ghz:", avgTR4,"ms")
+
+def memoryscheduler(processes, processors):
+    queue = []  # data structure for FIFO
+    P_abc = []
+    P_def = []
+    for process in processes:
+        queue.append(
+            processes[process[0]]
+        ) 
+    for i in range(200):
+        if (queue[i][2]<8000):
+            P_abc.append(queue[i])
+        elif(queue[i][2]>8000):
+            P_def.append(queue[i])
+    print("process with less than 8GB")        
+    print(P_abc)
+    print("process with more than 8GB")
+    print(P_def)
+    WT = 0
+    TR = 0
+    i = 0
+    WT2 = 0
+    TR2 = 0
+    j = 0
+    arrWT = []
+    arrTR = []
+    arr_WT = []
+    arr_TR = []
+    
+    while(i<len(P_abc)):
+        TR += P_abc[i][1]
+        arrWT.append(WT)
+        arrTR.append(TR)
+        WT += P_abc[i][1]
+        i+=1
+    avgWT = (sum(arrWT)/len(P_abc)) 
+    avgTR = (sum(arrTR)/len(P_abc)) 
+    avgWT2 = (avgWT/(2 * 10 ** 9)) 
+    avgTR2 = (avgTR/(2 * 10 ** 9))
+    avgWT4 = (avgWT/(4 * 10 ** 9)) 
+    avgTR4 = ((avgWT/(4 * 10 ** 9)))
+    while(j<len(P_def)):
+        TR2 += P_def[j][1]
+        arr_WT.append(WT2)
+        arr_TR.append(TR2)
+        WT2 += P_def[j][1]
+        j+=1
+    avg_WT = (sum(arr_WT)/len(P_def)) 
+    avg_TR = (sum(arr_TR)/len(P_def)) 
+    avg_WT2 = (avg_WT/(2 * 10 ** 9)) 
+    avg_TR2 = (avg_TR/(2 * 10 ** 9))
+    avg_WT4 = (avg_WT/(4 * 10 ** 9)) 
+    avg_TR4 = ((avg_WT/(4 * 10 ** 9)))
+    
+    print("average wait time on processes with 8gb or more with 2ghz:",avg_WT2,"ms")
+    print("average turnaround time on processes with 8gb or more with 2ghz:", avg_TR2,"ms")
+    print("average wait time on processes with 8gb or more with 4ghz:",avg_WT4,"ms")
+    print("average turnaround time on processes with 8gb or more with 4ghz:", avg_TR4,"ms")
+    print("average wait time on processes with 8gb or less with 2ghz:",avgWT2,"ms")
+    print("average turnaround time on processes with 8gb or less with 2ghz:", avgTR2,"ms")
+    print("average wait time on processes with 8gb or less with 4ghz:",avgWT4,"ms")
+    print("average turnaround time on processes with 8gb or less with 4ghz:", avgTR4,"ms")
+    
+def scheduleFIFO(processes, processors):
+    queue = []  
+    turnaround = []
+    for process in processes:
+        queue.append(
+            processes[process[0]]
+        )  
+    WT = 0
+    TR = 0
+    i=0
+    arrWT = []
+    arrTR = []
+    
+    while(i<len(queue)):
+        TR += queue[i][1]
+        arrWT.append(WT)
+        arrTR.append(TR)
+        WT += queue[i][1]
+        i+=1
+    avgWT = (sum(arrWT)/len(queue)) 
+    avgTR = (sum(arrTR)/len(queue)) 
+    print(queue)
+    print("average wait time:",avgWT,"ms")
+    print("average turnaround time:", avgTR,"ms")
+    
+def scheduleSJF(processes, processors):
+    queue = [] 
+    turnaround = []
+    for process in processes:
+        queue.append(
+            processes[process[0]]
+        )  
+    queue.sort(key=SortBySec) 
+    WT = 0
+    TR = 0
+    i=0
+    arrWT = []
+    arrTR = []
+    
+    while(i<len(queue)):
+        TR += queue[i][1]
+        arrWT.append(WT)
+        arrTR.append(TR)
+        WT += queue[i][1]
+        i+=1
+    avgWT = (sum(arrWT)/len(queue)) 
+    avgTR = (sum(arrTR)/len(queue)) 
+    print(queue)
+    print("average wait time:",avgWT,"ms")
+    print("average turnaround time:", avgTR,"ms")
+    
+   
+def roundrobin(burst_times, TQ):
+    copy1 = burst_times[:]
+    copy2 = burst_times[:]
+    copy3 = burst_times[:]
+    processes = [i+1 for i in range(len(copy2))]
+    w=0
+    while(copy2.count(None) != len(copy2)):
+        if(copy2[w]!=None):
+            k = copy2[w]-TQ
+            if(k<1):
+                copy2[w] = None
+            else:
+                copy2[w]=k
+            if(w == len(copy2)-1):
+                w=0
+                for k in range(len(copy2)):
+                    if(copy2[k]!=None): 
+                        processes.append(k+1)
+            else:
+                w+=1
+        else:
+            if(w == len(copy2)-1):
+                w=0
+                for k in range(len(copy2)):
+                    if(copy2[k]!=None):
+                        processes.append(k+1)
+            else:
+                w+=1
+    s=0
+    waiting_time=[]
+    i=0
+    j=1
+    while(True):
+        if(i == len(copy3)):
+            i=0
+            j=1
+        if(burst_times[i]!=None):
+            k = burst_times[i] - TQ
+            if(k>=1):
+                s+=TQ
+                waiting_time.append(s)
+                burst_times[i] = k
+                j+=1
+            elif(k<1):
+                s+=burst_times[i]
+                waiting_time.append(s)
+                j+=1
+                burst_times[i] = None
+            i+=1
+        elif(burst_times.count(None)==len(copy3)):
+            break
+        else:
+            i+=1
+    tot = list(zip(processes, waiting_time))
+    q=1
+    seq = []
+    t = 1
+    while(q<len(copy3)+1):
+        lis = []
+        for i in range(t, len(tot)):
+            if(tot[i][0]==q):
+                lis.append(i)
+        q+=1
+        t+=1
+        if(len(lis)==0):
+            lis.append(0)
+        seq.append(lis)
+    p=1
+    san = []
+    for i in range(len(seq)):
+        total=0
+        j=0
+        if(max(seq[i]))==0:
+            a=waiting_time[:i]
+            a.insert(0,0)
+            for k in range(len(a)-1, 0, -1):
+                total+=a[k] - a[k-1]
+            san.append(total)
+            tot.pop(0)
+        while(j<max(seq[i])):
+            if(tot[j+1][0] != i+1):
+                total+=tot[j+1][1] - tot[j][1]
+                j+=1
+            elif(tot[j+1][0]==i+1):
+                j+=1
+            if(j == max(seq[i])-i):
+                if(i>0):
+                    total+= waiting_time[i-1]
+                san.append(total)
+                tot.pop(0)
+                break
+    print("process                                  Burst Time                                      Waiting time                                    turnaround")  
+    for i in range(len(burst_times)):
+        print("P"+str(i+1)+"\t\t\t\t\t"+str(copy1[i])+"\t\t\t\t\t"+str(san[i])+"\t\t\t\t\t"+str(san[i]+copy1[i]))
+    return(sum(san)/len(san), sum(list(map(sum, zip(copy1, san))))/len(san)) 
+       #print("Average wait time: " + str(lis[0]))
+       #print("Average turn around time: " + str(lis[1]))
+
+def scheduler(processes):
+    queue = []  
+    turnaround = []
+    for process in processes:
+        queue.append(
+            processes[process[0]]
+        )  
+    WT = 0
+    TR = 0
+    i=0
+    arrWT = []
+    arrTR = []
+    
+    while(i<len(queue)):
+        TR += queue[i][1]
+        arrWT.append(WT)
+        arrTR.append(TR)
+        WT += queue[i][1]
+        i+=1
+    avgWT = (sum(arrWT)/len(queue)) 
+    avgTR = (sum(arrTR)/len(queue)) 
+    print(queue)
+    print("average wait time:",avgWT,"ms")
+    print("average turnaround time:", avgTR,"ms")   
+  
+def main():
+    
+    processors = [
+        0 for i in range(6)
+    ]  
+    Pa = []
+    Pb = []
+    Pc = []
+    Pd = []
+    Pe = []
+    Pf = []
+    
+    proc_list = []
+
+    for proc in range(250):  
+        pid = proc  
+        proc_list.append([pid, genBurst(), genMem()])  
+        
+    for i in range(0,40):
+        Pa.append(proc_list[i])
+    print ("processor 1 contains processes:")    
+    print(Pa)   
+    
+    for i in range(40,80):
+        Pb.append(proc_list[i])
+    print ("processor 2 contains processes:")
+    print(Pb) 
+    
+    for i in range(80,120):
+        Pc.append(proc_list[i])
+    print ("processor 3 contains processes:")
+    print(Pc) 
+    
+    for i in range(120,160):
+        Pd.append(proc_list[i])
+    print ("processor 4 contains processes:")
+    print(Pd) 
+    
+    for i in range(160,200):
+        Pe.append(proc_list[i])
+    print ("processor 5 contains processes:")
+    print(Pe) 
+    
+    for i in range(200,250):
+        Pf.append(proc_list[i])
+    print ("processor 6 contains processes:")
+    print(Pf) 
+        
+    with open("processes.csv", "w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["Process ID", "CPU Cycles", "Memory Requirement"])
+        writer.writerows(proc_list)
+    np = len(proc_list)
+    burst_times = []
+    for i in range(np):
+        burst_times.append(proc_list[i][1])
+    scheduleFIFO(proc_list, processors)
+    scheduleSJF(proc_list, processors)
+    Time_quantum = int(input("enter qunntum time: "))
+    lis=roundrobin(burst_times, Time_quantum) 
+    print("Average wait time: " + str(lis[0]))
+    print("Average turn around time: " + str(lis[1]))
+    memoryscheduler(proc_list, processors)    
+    cpuscheduler(proc_list, processors)
+    scheduler(proc_list)
+    
+
+main()  
